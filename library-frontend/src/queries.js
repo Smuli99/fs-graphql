@@ -22,3 +22,20 @@ export const ALL_BOOKS = gql /* GraphQL */ `
     }
   }
 `
+
+export const CREATE_BOOK = gql /* GraphQL */ `
+  mutation createBook(
+    $title: String!
+    $author: String!
+    $published: Int!
+    $genres: [String!]!
+  ) {
+    addBook(title: $title, author: $author, published: $published, genres: $genres) {
+      title
+      author
+      published
+      genres
+      id
+    }
+  }
+`
