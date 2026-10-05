@@ -10,3 +10,15 @@ export const ALL_AUTHORS = gql /* GraphQL */ `
     }
   }
 `
+
+export const ALL_BOOKS = gql /* GraphQL */ `
+  query getBooks {
+    allBooks {
+      title
+      author
+      published
+      genres
+      id
+    }
+  }
+`

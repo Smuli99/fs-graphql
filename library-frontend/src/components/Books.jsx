@@ -1,9 +1,15 @@
-const Books = (props) => {
-  if (!props.show) {
-    return null
-  }
+const Book = ({ book }) => {
+  return (
+    <tr>
+      <td>{book.title}</td>
+      <td>{book.author}</td>
+      <td>{book.published}</td>
+    </tr>
+  )
+}
 
-  const books = []
+const Books = ({ show, books }) => {
+  if (!show) return null
 
   return (
     <div>
@@ -16,12 +22,8 @@ const Books = (props) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books.map((a) => (
-            <tr key={a.id}>
-              <td>{a.title}</td>
-              <td>{a.author}</td>
-              <td>{a.published}</td>
-            </tr>
+          {books.map((book) => (
+            <Book key={book.id} book={book} />
           ))}
         </tbody>
       </table>
