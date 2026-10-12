@@ -1,9 +1,9 @@
 const { GraphQLError } = require('graphql/error');
 const jwt = require('jsonwebtoken');
 
-const Author = require('./model/author');
-const Book = require('./model/book');
-const User = require('./model/user');
+const Author = require('./models/author');
+const Book = require('./models/book');
+const User = require('./models/user');
 
 const createAuthor = async (args) => {
   const authorExists = await findAuthorByName(args.name);
@@ -59,6 +59,7 @@ const resolvers = {
       return Book.find(filter).populate('author');
     },
     allAuthors: async () => Author.find({}),
+    me: (root, args, context) => context.currentUser, 
   },
   Author: {
     bookCount: (root) => Book.collection.countDocuments({ author: root._id }),
@@ -102,21 +103,13 @@ const resolvers = {
       const currentUser = context.currentUser;
 
       if (!currentUser) {
-        throw new GraphQLError('not authenicated', {
+        throw new GraphQLError('not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' }
         });
       }
 
       const author = await findAuthorByName(args.name);
-      
-      if (!author) {
-        throw new GraphQLError(`Author not found: ${args.name}`, {
-          extensions: {
-            code: 'BAD_USER_INPUT',
-            invalidArgs: args.name,
-          }
-        });
-      };
+      if (!author) return null;
 
       author.born = args.setBornTo;
       
@@ -167,7 +160,7 @@ const resolvers = {
     login: async (root, args) => {
       const user = await findUserByName(args.username);
 
-      if ( !user || args.password != 'salasana' ) {
+      if ( !user || args.password != 'secret' ) {
         throw new GraphQLError('wrong credentials', {
           extensions: { code: 'BAD_USER_INPUT' }
         });
@@ -179,6 +172,18 @@ const resolvers = {
       };
 
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET) };
+    },
+
+    _resetDatabase: async () => {
+      if (process.env.NODE_ENV !== 'test') {
+        throw new GraphQLError('_resetDatabase is only available in test mode');
+      }
+
+      await Author.deleteMany({});
+      await Book.deleteMany({});
+      await User.deleteMany({});
+
+      return true;
     },
   }
 }
