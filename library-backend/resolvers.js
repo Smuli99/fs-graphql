@@ -105,24 +105,23 @@ const resolvers = {
   Query: {
     bookCount: async () => Book.collection.countDocuments(),
     authorCount: async () => Author.collection.countDocuments(),
-    allBooks: (root, args) => {
-      // const byAuthor = (book) =>
-      //   book.author.toLowerCase() === args.author.toLowerCase();
+    allBooks: async (root, args) => {
+      const filter = {};
 
-      // const byGenre = (book) =>
-      //   book.genres.some(genre => genre.toLowerCase() === args.genre.toLowerCase());
+      if (args.author) {
+        const author = await findAuthorByName(args.author);
+        if (!author) return [];
+        filter.author = author._id;
+      }
 
-      // return books.filter(
-      //   (book) =>
-      //     (!args.author || byAuthor(book)) &&
-      //     (!args.genre || byGenre(book))
-      // );
+      if (args.genre) filter.genres = args.genre;
+
+      return Book.find(filter).populate('author');
     },
     allAuthors: async () => Author.find({}),
   },
   Author: {
-    bookCount: (root) =>
-      books.filter(book => book.author.toLowerCase() === root.name.toLowerCase()).length,
+    bookCount: (root) => Book.collection.countDocuments({ author: root._id }),
   },
   Mutation: {
     addBook: async (root, args) => {
@@ -138,15 +137,24 @@ const resolvers = {
       return book.populate('author');
     },
     addAuthor: (root, args) => createAuthor(args),
-    editAuthor: (root, args) => {
-      const author = authors.find(a => a.name.toLowerCase() === args.name.toLowerCase());
-      if (!author) return null;
+    editAuthor: async (root, args) => {
+      const author = await findAuthorByName(args.name);
+      
+      if (!author) {
+        throw new GraphQLError(`Author not found: ${args.name}`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.name,
+          }
+        });
+      };
 
-      const updatedAuthor = { ...author, born: args.setBornTo };
-      authors = authors.map(a => a.id === updatedAuthor.id ? updatedAuthor : a);
-      return updatedAuthor;
+      author.born = args.setBornTo;
+      await author.save();
+
+      return author;
     }
-  }
+  },
 }
 
 module.exports = resolvers;
