@@ -1,6 +1,9 @@
 const { GraphQLError } = require('graphql/error');
+const jwt = require('jsonwebtoken');
+
 const Author = require('./model/author');
 const Book = require('./model/book');
+const User = require('./model/user');
 
 const createAuthor = async (args) => {
   const authorExists = await findAuthorByName(args.name);
@@ -35,6 +38,9 @@ const createAuthor = async (args) => {
 const findAuthorByName = async (name) =>
   Author.findOne({ name }).collation({ locale: 'en', strength: 2 });
 
+const findUserByName = async (username) =>
+  User.findOne({ username }).collation({ locale: 'en', strength: 2 });
+
 const resolvers = {
   Query: {
     bookCount: async () => Book.collection.countDocuments(),
@@ -58,7 +64,15 @@ const resolvers = {
     bookCount: (root) => Book.collection.countDocuments({ author: root._id }),
   },
   Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, context) => {
+      const currentUser = context.currentUser;
+
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
       let author = await findAuthorByName(args.author);
       
       if (!author) {
@@ -81,8 +95,18 @@ const resolvers = {
 
       return book.populate('author');
     },
+
     addAuthor: (root, args) => createAuthor(args),
-    editAuthor: async (root, args) => {
+
+    editAuthor: async (root, args, context) => {
+      const currentUser = context.currentUser;
+
+      if (!currentUser) {
+        throw new GraphQLError('not authenicated', {
+          extensions: { code: 'UNAUTHENTICATED' }
+        });
+      }
+
       const author = await findAuthorByName(args.name);
       
       if (!author) {
@@ -109,8 +133,54 @@ const resolvers = {
       }
 
       return author;
-    }
-  },
+    },
+
+    createUser: async (root, args) => {
+      const userExists = await findUserByName(args.username);
+
+      if (userExists) {
+        throw new GraphQLError(`name must be unique: ${args.username}`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.username,
+          }
+        });
+      }
+
+      const user = new User({ ...args });
+
+      try {
+        await user.save();
+      } catch (error) {
+        throw new GraphQLError(`Failed to create user: ${error.message}`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.username,
+            error
+          }
+        });
+      }
+
+      return user;
+    },
+
+    login: async (root, args) => {
+      const user = await findUserByName(args.username);
+
+      if ( !user || args.password != 'salasana' ) {
+        throw new GraphQLError('wrong credentials', {
+          extensions: { code: 'BAD_USER_INPUT' }
+        });
+      }
+
+      const userForToken = {
+        username: user.username,
+        id: user._id,
+      };
+
+      return { value: jwt.sign(userForToken, process.env.JWT_SECRET) };
+    },
+  }
 }
 
 module.exports = resolvers;
