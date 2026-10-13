@@ -10,7 +10,7 @@ const Author = ({ author }) => {
   )
 }
 
-const Authors = ({ show, authors}) => {
+const Authors = ({ show, authors, user }) => {
   if (!show) return null
 
   return (
@@ -29,7 +29,7 @@ const Authors = ({ show, authors}) => {
         </tbody>
       </table>
 
-      <BirthyearForm authors={authors} />
+      {user && <BirthyearForm authors={authors} />}
     </div>
   )
 }
