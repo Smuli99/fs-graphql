@@ -68,3 +68,12 @@ export const LOGIN = gql /* GraphQL */ `
     }
   }
 `
+
+export const CURRENT_USER = gql /* GraphQL */ `
+  query getUser {
+    me {
+      username
+      favoriteGenre
+    }
+  }
+`
