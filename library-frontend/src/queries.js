@@ -12,8 +12,8 @@ export const ALL_AUTHORS = gql /* GraphQL */ `
 `
 
 export const ALL_BOOKS = gql /* GraphQL */ `
-  query getBooks {
-    allBooks {
+  query getBooks($author: String, $genre: String) {
+    allBooks(author: $author, genre: $genre) {
       title
       author {
         name

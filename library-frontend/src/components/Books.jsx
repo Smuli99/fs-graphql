@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 const Book = ({ book }) => {
   return (
     <tr>
@@ -9,11 +11,22 @@ const Book = ({ book }) => {
 }
 
 const Books = ({ show, books }) => {
+  const [filter, setFilter] = useState('all genres');
+  const genres = [ ...new Set(books.flatMap(book => book.genres)) ].concat('all genres');
+  const booksToShow = filter === 'all genres'
+    ? books
+    : books.filter(book => book.genres.includes(filter));
+  
   if (!show) return null
 
   return (
     <div>
       <h2>books</h2>
+
+      {filter === 'all genres'
+        ? <strong>all genres</strong>
+        : <div>in genre <strong>{filter}</strong></div> 
+      }
 
       <table>
         <tbody>
@@ -22,11 +35,15 @@ const Books = ({ show, books }) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books.map((book) => (
+          {booksToShow.map((book) => (
             <Book key={book.id} book={book} />
           ))}
         </tbody>
       </table>
+
+      {genres.map(genre => (
+        <button key={genre} onClick={() => setFilter(genre)}>{genre}</button>
+      ))}
     </div>
   )
 }
