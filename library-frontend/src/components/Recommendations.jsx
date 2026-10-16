@@ -9,7 +9,8 @@ const Recommendations = ({ show }) => {
   
   const booksResult = useQuery(ALL_BOOKS, {
     variables: { genre: favoriteGenre },
-    skip: !show
+    skip: !show,
+    fetchPolicy: 'cache-and-network',
   });
   
   if (!show) return null;

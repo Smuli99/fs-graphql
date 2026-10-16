@@ -9,7 +9,8 @@ const FilterBooks = ({ show, books }) => {
   const [filter, setFilter] = useState('all genres');
   const booksResult = useQuery(ALL_BOOKS, {
     variables: { genre: filter === 'all genres' ? undefined : filter},
-    skip: !show
+    skip: !show,
+    fetchPolicy: 'cache-and-network',
   });
   
   if (!show) return null;
