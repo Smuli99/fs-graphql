@@ -24,6 +24,7 @@ const BirthyearForm = ({ authors }) => {
         <div>
           name
           <select
+            name='name'
             value={name}
             onChange={({ target }) => setName(target.value)}
           >
@@ -34,10 +35,10 @@ const BirthyearForm = ({ authors }) => {
             ))}
           </select>
         </div>
-        <div>
+        <label>
           born
           <input type='' value={born} onChange={({ target }) => setBorn(target.value)} />
-        </div>
+        </label>
         <button type='submit'>update author</button>
       </form>
     </div>

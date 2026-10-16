@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { LOGIN } from '../queries';
 
-const Login = ({ show, setToken, setPage }) => {
+const Login = ({ show, setToken, setPage, notify }) => {
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('secret');
+  const [password, setPassword] = useState('');
 
   const [ login ] = useMutation(LOGIN, {
     onCompleted: (data) => {
@@ -12,6 +12,7 @@ const Login = ({ show, setToken, setPage }) => {
       setToken(token);
       localStorage.setItem('library-user-token', token);
     },
+    onError: () => notify('login failed'), // testejä varten
   });
   
   if (!show) return null;
@@ -21,7 +22,7 @@ const Login = ({ show, setToken, setPage }) => {
 
     login({ variables: { username, password } });
     setPage('authors');
-
+    
     setUsername('');
     setPassword('secret');
   };
@@ -29,14 +30,14 @@ const Login = ({ show, setToken, setPage }) => {
   return (
     <div>
       <form onSubmit={submit}>
-        <div>
+        <label>
           username
           <input value={username} onChange={({ target }) => setUsername(target.value)} />
-        </div>
-        <div>
+        </label>
+        <label>
           password
           <input value={password} onChange={({ target }) => setPassword(target.value)} />
-        </div>
+        </label>
         <button type='submit'>login</button>
       </form>
     </div>

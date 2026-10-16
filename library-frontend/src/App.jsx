@@ -7,9 +7,11 @@ import NewBook from './components/NewBook'
 import Login from './components/Login'
 import FilterBooks from './components/FilterBooks'
 import Recommendations from './components/Recommendations'
+import Notify from './components/Notify'
 
 const App = () => {
   const [page, setPage] = useState('authors');
+  const [errorMessage, setErrorMessage] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('library-user-token'));
   
   const authorsResult = useQuery(ALL_AUTHORS);
@@ -37,13 +39,15 @@ const App = () => {
         { token && <button onClick={onLogout}>logout</button>}
       </div>
 
+      <Notify errorMessage={errorMessage} />
+
       <Authors show={page === 'authors'} authors={authorsResult.data.allAuthors} user={ token !== null }/>
 
       <FilterBooks show={page === 'books'} books={booksResult.data.allBooks} />
 
       <NewBook show={page === 'add'} />
 
-      <Login show={page === 'login'} setToken={setToken} setPage={setPage} />
+      <Login show={page === 'login'} setToken={setToken} setPage={setPage} notify={setErrorMessage} />
 
       <Recommendations show={page === 'recommendations'} />
 

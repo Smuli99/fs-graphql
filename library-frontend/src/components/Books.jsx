@@ -15,10 +15,12 @@ const Books = ({ books, title, genres, filter, setFilter }) => {
     <div>
       <h2>{title}</h2>
 
-      {filter === 'all genres'
+      {genres && filter === 'all genres'
         ? <strong>all genres</strong>
         : <div>in genre <strong>{filter}</strong></div> 
       }
+
+      {!genres && 'books in your favorite genre'}
 
       {noBooks && <div style={{ marginTop: 10 }}>No books</div>}
       {!noBooks && (
