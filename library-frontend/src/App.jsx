@@ -45,7 +45,7 @@ const App = () => {
 
       <Login show={page === 'login'} setToken={setToken} setPage={setPage} />
 
-      <Recommendations show={page === 'recommendations'} books={booksResult.data.allBooks} />
+      <Recommendations show={page === 'recommendations'} />
 
     </div>
   );
