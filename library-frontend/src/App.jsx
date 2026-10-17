@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { ALL_AUTHORS, ALL_BOOKS } from './queries'
-import { useApolloClient, useQuery } from '@apollo/client/react'
+import { ALL_AUTHORS, ALL_BOOKS, BOOK_ADDED } from './queries'
+import { useApolloClient, useQuery, useSubscription } from '@apollo/client/react'
 
 import Authors from './components/Authors'
 import NewBook from './components/NewBook'
@@ -18,6 +18,14 @@ const App = () => {
   const booksResult = useQuery(ALL_BOOKS);
   const client = useApolloClient();
 
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      const addedBook = data.data.bookAdded;
+      notify(`${addedBook.title} added!`);
+    },
+    onError: (error) => console.log(error),
+  });
+  
   if (authorsResult.loading || booksResult.loading) return <div>loading...</div>;
 
   const onLogout = () => {
@@ -26,6 +34,11 @@ const App = () => {
     client.resetStore();
 
     if (page === 'add') setPage('authors');
+  };
+
+  const notify = (message) => {
+    setErrorMessage(message);
+    setTimeout(() => setErrorMessage(null), 5000);
   };
 
   return (
@@ -47,7 +60,7 @@ const App = () => {
 
       <NewBook show={page === 'add'} />
 
-      <Login show={page === 'login'} setToken={setToken} setPage={setPage} notify={setErrorMessage} />
+      <Login show={page === 'login'} setToken={setToken} setPage={setPage} notify={notify} />
 
       <Recommendations show={page === 'recommendations'} />
 

@@ -9,6 +9,10 @@ const typeDefs = /* GraphQL */ `
     value: String!
   }
 
+  type Subscription {
+    bookAdded: Book!
+  }
+
   type Book {
     title: String!
     author: Author!
