@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ALL_AUTHORS, ALL_BOOKS, BOOK_ADDED } from './queries'
 import { useApolloClient, useQuery, useSubscription } from '@apollo/client/react'
+import { addBookToCache } from './utils/apolloCache'
 
 import Authors from './components/Authors'
 import NewBook from './components/NewBook'
@@ -22,6 +23,7 @@ const App = () => {
     onData: ({ data }) => {
       const addedBook = data.data.bookAdded;
       notify(`${addedBook.title} added!`);
+      addBookToCache(client.cache, addedBook);
     },
     onError: (error) => console.log(error),
   });
@@ -58,7 +60,7 @@ const App = () => {
 
       <FilterBooks show={page === 'books'} books={booksResult.data.allBooks} />
 
-      <NewBook show={page === 'add'} />
+      <NewBook show={page === 'add'} notify={notify} />
 
       <Login show={page === 'login'} setToken={setToken} setPage={setPage} notify={notify} />
 
