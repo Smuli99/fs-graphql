@@ -62,11 +62,18 @@ const resolvers = {
 
       return Book.find(filter).populate('author');
     },
-    allAuthors: async () => Author.find({}),
+    allAuthors: async () => {
+      console.log('Author.find');
+      return Author.find({});
+    },
     me: (root, args, context) => context.currentUser, 
   },
   Author: {
-    bookCount: (root) => Book.collection.countDocuments({ author: root._id }),
+    bookCount: (root) => {
+      console.log('Book.count');
+      // return Book.collection.countDocuments({ author: root._id })
+      return root.books.length;
+    },
   },
   Mutation: {
     addBook: async (root, args, context) => {
@@ -88,6 +95,8 @@ const resolvers = {
       
       try {
         await book.save();
+        author.books = author.books.concat(book._id);
+        await author.save();
       } catch (error) {
         throw new GraphQLError(`Saving book failed: ${error.message}`, {
           extensions: {
