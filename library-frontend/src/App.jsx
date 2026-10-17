@@ -22,7 +22,7 @@ const App = () => {
   useSubscription(BOOK_ADDED, {
     onData: ({ data }) => {
       const addedBook = data.data.bookAdded;
-      notify(`${addedBook.title} added!`);
+      notify('New book added!');
       addBookToCache(client.cache, addedBook);
     },
     onError: (error) => console.log(error),
